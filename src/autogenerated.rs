@@ -1,4 +1,3 @@
-
 use crate::autocxxsubclass::{AutocxxSubclassHolder, AutocxxSubclassPeer};
 use crate::MyWebContentsObserver;
 

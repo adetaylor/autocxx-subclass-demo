@@ -1,7 +1,10 @@
-use std::{cell::RefCell, pin::Pin, rc::{Rc, Weak}};
+use std::{
+    cell::RefCell,
+    pin::Pin,
+    rc::{Rc, Weak},
+};
 
-use cxx::{UniquePtr, memory::UniquePtrTarget};
-
+use cxx::{memory::UniquePtrTarget, UniquePtr};
 
 pub trait AutocxxSubclassPeer: UniquePtrTarget {
     fn relinquish_ownership(self: Pin<&mut Self>);
@@ -44,7 +47,9 @@ impl<CppPeer: AutocxxSubclassPeer> CppPeerHolder<CppPeer> {
         *self = Self::Owned(Box::new(peer));
     }
     fn set_unowned(&mut self, peer: &mut UniquePtr<CppPeer>) {
-        *self = Self::Unowned(unsafe { std::pin::Pin::<&mut CppPeer>::into_inner_unchecked(peer.pin_mut())} );
+        *self = Self::Unowned(unsafe {
+            std::pin::Pin::<&mut CppPeer>::into_inner_unchecked(peer.pin_mut())
+        });
     }
 }
 
