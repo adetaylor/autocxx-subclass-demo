@@ -1,12 +1,5 @@
 use cxx::{private::UniquePtrTarget, UniquePtr};
-use std::{
-    borrow::BorrowMut,
-    cell::RefCell,
-    mem,
-    pin::Pin,
-    ptr::null_mut,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, pin::Pin, ptr::null_mut, rc::{Rc, Weak}};
 
 #[cxx::bridge]
 mod ffi {
@@ -179,8 +172,8 @@ impl<CppPeer: AutocxxSubclassPeer> CppPeerHolder<CppPeer> {
     fn set_owned(&mut self, peer: UniquePtr<CppPeer>) {
         *self = Self::Owned(Box::new(peer));
     }
-    fn set_unowned(&mut self, peer: &UniquePtr<CppPeer>) {
-        *self = Self::Unowned(peer.as_mut_ptr());
+    fn set_unowned(&mut self, peer: &mut UniquePtr<CppPeer>) {
+        *self = Self::Unowned(unsafe { std::pin::Pin::<&mut CppPeer>::into_inner_unchecked(peer.pin_mut())} );
     }
 }
 
@@ -248,8 +241,8 @@ impl<CppPeer: AutocxxSubclassPeer, T: Unpin> AutocxxSubclass<CppPeer, T> {
             data,
         }));
         let holder = Box::new(AutocxxSubclassHolder::Owned(me.clone()));
-        let cpp_side = f(holder);
-        me.as_ref().borrow_mut().cpp_peer.set_unowned(&cpp_side);
+        let mut cpp_side = f(holder);
+        me.as_ref().borrow_mut().cpp_peer.set_unowned(&mut cpp_side);
         cpp_side
     }
 
