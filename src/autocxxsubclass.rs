@@ -35,6 +35,12 @@ pub enum CppPeerHolder<CppPeer: AutocxxSubclassPeer> {
     Unowned(*mut CppPeer),
 }
 
+impl<CppPeer: AutocxxSubclassPeer> Default for CppPeerHolder<CppPeer> {
+    fn default() -> Self {
+        CppPeerHolder::Empty
+    }
+}
+
 impl<CppPeer: AutocxxSubclassPeer> CppPeerHolder<CppPeer> {
     fn pin_mut(&mut self) -> Pin<&mut CppPeer> {
         match self {
@@ -117,8 +123,8 @@ where
     PeerBoxer: FnOnce(Rc<RefCell<Subclass>>) -> AutocxxSubclassHolder<Subclass> {
     let me = Rc::new(RefCell::new(constructor(CppPeerHolder::Empty)));
     let holder = Box::new(peer_boxer(me.clone()));
-    let mut cpp_side = peer_constructor(holder);
-    me.as_ref().borrow_mut().get_peer().set_unowned(&mut cpp_side);
+    let cpp_side = peer_constructor(holder);
+    me.as_ref().borrow_mut().get_peer().set_owned(cpp_side);
     me
 }
 
