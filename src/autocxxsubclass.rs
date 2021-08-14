@@ -59,6 +59,24 @@ impl<CppPeer: AutocxxSubclassPeer> CppPeerHolder<CppPeer> {
     }
 }
 
+fn make_owning_peer<CppPeer, PeerConstructor, Subclass, PeerBoxer>(
+    me: Subclass,
+    peer_constructor: PeerConstructor,
+    peer_boxer: PeerBoxer,
+) -> Rc<RefCell<Subclass>>
+where
+    CppPeer: AutocxxSubclassPeer,
+    Subclass: AutocxxSubclass<CppPeer>,
+    PeerConstructor: FnOnce(Box<AutocxxSubclassHolder<Subclass>>) -> UniquePtr<CppPeer>,
+    PeerBoxer: FnOnce(Rc<RefCell<Subclass>>) -> AutocxxSubclassHolder<Subclass>,
+{
+    let me = Rc::new(RefCell::new(me));
+    let holder = Box::new(peer_boxer(me.clone()));
+    let cpp_side = peer_constructor(holder);
+    me.as_ref().borrow_mut().get_peer().set_owned(cpp_side);
+    me
+}
+
 /// A subclass of a C++ type.
 ///
 /// This actually consists of two objects: this object itself and a C++-side
@@ -109,23 +127,6 @@ pub trait AutocxxSubclass<CppPeer: AutocxxSubclassPeer> {
         cpp_side
     }
 
-    fn make_owning_peer<PeerConstructor, Subclass, PeerBoxer>(
-        me: Subclass,
-        peer_constructor: PeerConstructor,
-        peer_boxer: PeerBoxer,
-    ) -> Rc<RefCell<Subclass>>
-    where
-        Subclass: AutocxxSubclass<CppPeer>,
-        PeerConstructor: FnOnce(Box<AutocxxSubclassHolder<Subclass>>) -> UniquePtr<CppPeer>,
-        PeerBoxer: FnOnce(Rc<RefCell<Subclass>>) -> AutocxxSubclassHolder<Subclass>,
-    {
-        let me = Rc::new(RefCell::new(me));
-        let holder = Box::new(peer_boxer(me.clone()));
-        let cpp_side = peer_constructor(holder);
-        me.as_ref().borrow_mut().get_peer().set_owned(cpp_side);
-        me
-    }
-
     /// Creates a new instance of this subclass. This instance is not owned
     /// by C++, and therefore will be deleted when it goes out of scope in
     /// Rust.
@@ -137,7 +138,7 @@ pub trait AutocxxSubclass<CppPeer: AutocxxSubclassPeer> {
         Subclass: AutocxxSubclass<CppPeer>,
         PeerConstructor: FnOnce(Box<AutocxxSubclassHolder<Subclass>>) -> UniquePtr<CppPeer>,
     {
-        Self::make_owning_peer(me, peer_constructor, |me| {
+        make_owning_peer(me, peer_constructor, |me| {
             AutocxxSubclassHolder::Unowned(Rc::downgrade(&me))
         })
     }
@@ -160,7 +161,7 @@ pub trait AutocxxSubclassSelfOwned<CppPeer: AutocxxSubclassPeer>: AutocxxSubclas
         Subclass: AutocxxSubclass<CppPeer>,
         PeerConstructor: FnOnce(Box<AutocxxSubclassHolder<Subclass>>) -> UniquePtr<CppPeer>,
     {
-        Self::make_owning_peer(me, peer_constructor, AutocxxSubclassHolder::Owned)
+        make_owning_peer(me, peer_constructor, AutocxxSubclassHolder::Owned)
     }
 
     /// Relinquishes ownership from the C++ side. If there are no outstanding
