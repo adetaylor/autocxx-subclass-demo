@@ -1,4 +1,4 @@
-use crate::autocxxsubclass::{AutocxxSubclassHolder, AutocxxSubclassPeer};
+use crate::autocxxsubclass::{AutocxxSubclass, AutocxxSubclassHolder, AutocxxSubclassPeer};
 use crate::MyWebContentsObserver;
 
 #[cxx::bridge]
@@ -124,6 +124,6 @@ pub(crate) trait MyWebContentsObserverDefaults {
 
 impl MyWebContentsObserverDefaults for MyWebContentsObserver {
     fn get(&mut self) -> std::pin::Pin<&mut ffi::MyWebContentsObserverCpp> {
-        self.get_peer()
+        self.pin_peer()
     }
 }
