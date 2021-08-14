@@ -1,6 +1,6 @@
 fn main() {
     cxx_build::bridge("src/main.rs")
-        .file("src/blobstore.cc")
+        .file("src/test.cc")
         .flag_if_supported("-std=c++14")
         .compile("autocxx-subclass-demo");
 

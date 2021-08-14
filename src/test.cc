@@ -1,5 +1,5 @@
-#include "demo/include/test.h"
-#include "demo/src/main.rs.h"
+#include "autocxx-subclass-demo/include/test.h"
+#include "autocxx-subclass-demo/src/main.rs.h"
 
 WebContentsObserver::WebContentsObserver() {}
 WebContentsObserver::WebContentsObserver(WebContents* wc) : web_contents_(wc) {}
