@@ -88,14 +88,6 @@ pub trait AutocxxSubclass<CppPeer: AutocxxSubclassPeer> {
         self.get_peer().pin_mut()
     }
 
-    /// Relinquishes ownership from the C++ side. If there are no outstanding
-    /// references from the Rust side, this will result in the destruction
-    /// of this subclass instance. TODO - make this available at compile
-    /// time only in the `new_self_owned` case.
-    fn delete_self(&mut self) {
-        self.pin_peer().relinquish_ownership()
-    }
-
     /// Creates a new instance of this subclass. This instance is owned by the
     /// returned [`cxx::UniquePtr`] and is thus suitable to be passed around
     /// in C++.
@@ -149,7 +141,9 @@ pub trait AutocxxSubclass<CppPeer: AutocxxSubclassPeer> {
             AutocxxSubclassHolder::Unowned(Rc::downgrade(&me))
         })
     }
+}
 
+pub trait AutocxxSubclassSelfOwned<CppPeer: AutocxxSubclassPeer>: AutocxxSubclass<CppPeer> {
     /// Creates a new instance of this subclass which owns itself.
     /// This is useful
     /// for observers (etc.) which self-register to listen to events.
@@ -167,5 +161,12 @@ pub trait AutocxxSubclass<CppPeer: AutocxxSubclassPeer> {
         PeerConstructor: FnOnce(Box<AutocxxSubclassHolder<Subclass>>) -> UniquePtr<CppPeer>,
     {
         Self::make_owning_peer(me, peer_constructor, AutocxxSubclassHolder::Owned)
+    }
+
+    /// Relinquishes ownership from the C++ side. If there are no outstanding
+    /// references from the Rust side, this will result in the destruction
+    /// of this subclass instance.
+    fn delete_self(&mut self) {
+        self.pin_peer().relinquish_ownership()
     }
 }
