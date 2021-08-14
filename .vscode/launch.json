@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'autocxx-subclass-demo'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=autocxx-subclass-demo",
+                    "--package=autocxx-subclass-demo"
+                ],
+                "filter": {
+                    "name": "autocxx-subclass-demo",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'autocxx-subclass-demo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=autocxx-subclass-demo",
+                    "--package=autocxx-subclass-demo"
+                ],
+                "filter": {
+                    "name": "autocxx-subclass-demo",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
