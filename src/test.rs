@@ -138,13 +138,24 @@ impl MyTestObserver {
 // }
 
 #[test]
-fn test_owned_by_rust() {
+fn tests() { // must be single threaded due to global Status
     assert!(!Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
     let obs = MyTestObserver::make_cpp_owned(
         MyTestObserver::new(),
-        |holder| ffi::MyTestObserverCpp_make_unique(holder),
+        ffi::MyTestObserverCpp_make_unique,
+    );
+    assert!(Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
+    assert!(Lazy::force(&STATUS).lock().unwrap().rust_allocated);
+    assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
+    std::mem::drop(obs);
+    assert!(!Lazy::force(&STATUS).lock().unwrap().rust_allocated);
+    assert!(!Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
+    assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
+    let obs = MyTestObserver::make_rust_owned(
+        MyTestObserver::new(),
+        ffi::MyTestObserverCpp_make_unique,
     );
     assert!(Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(Lazy::force(&STATUS).lock().unwrap().rust_allocated);
