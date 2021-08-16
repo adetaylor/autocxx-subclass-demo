@@ -25,6 +25,7 @@ mod ffi {
             rs_peer: Box<MyTestObserverHolder>,
         ) -> UniquePtr<MyTestObserverCpp>;
         fn MyTestObserverCpp_remove_ownership(self: Pin<&mut MyTestObserverCpp>);
+        fn TriggerTestObserverA(obs: Pin<&mut MyTestObserverCpp>);
     }
 
     extern "Rust" {
@@ -142,14 +143,17 @@ fn tests() { // must be single threaded due to global Status
     assert!(!Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
-    let obs = MyTestObserver::make_cpp_owned(
+    let mut obs = MyTestObserver::make_cpp_owned(
         MyTestObserver::new(),
         ffi::MyTestObserverCpp_make_unique,
     );
     assert!(Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
+    ffi::TriggerTestObserverA(obs.pin_mut());
+    assert!(Lazy::force(&STATUS).lock().unwrap().a_called);
     std::mem::drop(obs);
+    Lazy::force(&STATUS).lock().unwrap().a_called = false;
     assert!(!Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
@@ -157,9 +161,13 @@ fn tests() { // must be single threaded due to global Status
         MyTestObserver::new(),
         ffi::MyTestObserverCpp_make_unique,
     );
+    let cpp_peer_ptr = unsafe { obs.borrow_mut().pin_peer().get_unchecked_mut() as *mut ffi::MyTestObserverCpp };
     assert!(Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
     assert!(Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().a_called);
+    ffi::TriggerTestObserverA(unsafe{std::pin::Pin::new_unchecked(&mut *cpp_peer_ptr)});
+    assert!(Lazy::force(&STATUS).lock().unwrap().a_called);
+    Lazy::force(&STATUS).lock().unwrap().a_called = false;
     std::mem::drop(obs);
     assert!(!Lazy::force(&STATUS).lock().unwrap().rust_allocated);
     assert!(!Lazy::force(&STATUS).lock().unwrap().cpp_allocated);
