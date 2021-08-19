@@ -7,7 +7,9 @@ publish = false
 [dependencies]
 cxx = "1.0"
 once_cell = "1.8"
-
+syn = "1.0.74"
+proc-macro-error = { version = "1", default-features = false }
+quote = "1.0.9"
 
 [build-dependencies]
 cxx-build = "1.0"

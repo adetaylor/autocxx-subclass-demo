@@ -8,7 +8,7 @@ pub(crate) mod ffi {
         type WebContents;
         type GlobalRenderFrameHostId;
         type RenderFrameHost;
-        type MyWebContentsObserverCpp;
+        type MyWebContentsObserverCpp; // 1
 
         fn GetLastCommittedURL(self: &RenderFrameHost) -> UniquePtr<CxxString>;
         fn SaveImageAt(self: Pin<&mut RenderFrameHost>, x: u32, y: u32);
@@ -27,7 +27,7 @@ pub(crate) mod ffi {
             self: Pin<&mut MyWebContentsObserverCpp>,
         ) -> *mut WebContents;
 
-        fn MyWebContentsObserverCpp_make_unique(
+        fn MyWebContentsObserverCpp_make_unique( // 1a
             rs_peer: Box<MyWebContentsObserverHolder>,
         ) -> UniquePtr<MyWebContentsObserverCpp>;
 
@@ -40,9 +40,9 @@ pub(crate) mod ffi {
     }
 
     extern "Rust" {
-        type MyWebContentsObserverHolder;
+        type MyWebContentsObserverHolder;   // 1
 
-        pub(crate) unsafe fn MyWebContentsObserver_RenderFrameCreated(
+        pub(crate) unsafe fn MyWebContentsObserver_RenderFrameCreated( // 1a
             me: &MyWebContentsObserverHolder,
             render_frame_host: *mut RenderFrameHost,
         );
@@ -59,7 +59,7 @@ pub(crate) mod ffi {
 }
 
 impl ffi::MyWebContentsObserverCpp {
-    pub fn make_unique(rs_peer: Box<MyWebContentsObserverHolder>) -> cxx::UniquePtr<Self> {
+    pub fn make_unique(rs_peer: Box<MyWebContentsObserverHolder>) -> cxx::UniquePtr<Self> { // 1a
         ffi::MyWebContentsObserverCpp_make_unique(rs_peer)
     }
     pub unsafe fn make_unique2(
@@ -70,16 +70,16 @@ impl ffi::MyWebContentsObserverCpp {
     }
 }
 
-type MyWebContentsObserverHolder = AutocxxSubclassHolder<MyWebContentsObserver>;
+type MyWebContentsObserverHolder = AutocxxSubclassHolder<MyWebContentsObserver>; // 1
 
-impl AutocxxSubclassPeer for ffi::MyWebContentsObserverCpp {
+impl AutocxxSubclassPeer for ffi::MyWebContentsObserverCpp {  // 1a, just this line
     fn relinquish_ownership(self: std::pin::Pin<&mut Self>) {
         self.MyWebContentsObserverCpp_remove_ownership();
     }
 }
 
 #[allow(non_snake_case)]
-pub fn MyWebContentsObserver_RenderFrameCreated(
+pub fn MyWebContentsObserver_RenderFrameCreated( // 1a
     me: &MyWebContentsObserverHolder,
     render_frame_host: *mut ffi::RenderFrameHost,
 ) {

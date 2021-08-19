@@ -5,6 +5,10 @@ use std::{
 };
 
 use cxx::{memory::UniquePtrTarget, UniquePtr};
+extern crate proc_macro;
+use proc_macro::{Ident, TokenStream};
+use proc_macro_error::abort;
+use syn::{ItemStruct, parse_quote};
 
 pub trait AutocxxSubclassPeer: UniquePtrTarget {
     fn relinquish_ownership(self: Pin<&mut Self>);
@@ -171,3 +175,4 @@ pub trait AutocxxSubclassSelfOwned<CppPeer: AutocxxSubclassPeer>: AutocxxSubclas
         self.pin_peer().relinquish_ownership()
     }
 }
+
