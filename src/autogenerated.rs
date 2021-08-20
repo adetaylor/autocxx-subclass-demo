@@ -59,18 +59,18 @@ pub(crate) mod ffi {
 }
 
 impl ffi::MyWebContentsObserverCpp {
-    pub fn make_unique(rs_peer: Box<MyWebContentsObserverHolder>) -> cxx::UniquePtr<Self> { // 1a
-        ffi::MyWebContentsObserverCpp_make_unique(rs_peer)
+    pub fn make_unique(rs_peer: AutocxxSubclassHolder<MyWebContentsObserver>) -> cxx::UniquePtr<Self> { // 1a // change
+        ffi::MyWebContentsObserverCpp_make_unique(Box::new(MyWebContentsObserverHolder(rs_peer)))
     }
     pub unsafe fn make_unique2(
-        rs_peer: Box<MyWebContentsObserverHolder>,
+        rs_peer: AutocxxSubclassHolder<MyWebContentsObserver>,
         web_contents: *mut ffi::WebContents,
     ) -> cxx::UniquePtr<Self> {
-        ffi::MyWebContentsObserverCpp_make_unique2(rs_peer, web_contents)
+        ffi::MyWebContentsObserverCpp_make_unique2(Box::new(MyWebContentsObserverHolder(rs_peer)), web_contents)
     }
 }
 
-type MyWebContentsObserverHolder = AutocxxSubclassHolder<MyWebContentsObserver>; // 1
+pub struct MyWebContentsObserverHolder(pub AutocxxSubclassHolder<MyWebContentsObserver>); // 1
 
 impl AutocxxSubclassPeer for ffi::MyWebContentsObserverCpp {  // 1a, just this line
     fn relinquish_ownership(self: std::pin::Pin<&mut Self>) {
@@ -83,7 +83,7 @@ pub fn MyWebContentsObserver_RenderFrameCreated( // 1a
     me: &MyWebContentsObserverHolder,
     render_frame_host: *mut ffi::RenderFrameHost,
 ) {
-    if let Some(r) = me.get() {
+    if let Some(r) = me.0.get() {
         r.as_ref()
             .borrow_mut()
             .RenderFrameCreated(render_frame_host);
@@ -95,7 +95,7 @@ pub fn MyWebContentsObserver_RenderFrameDeleted(
     me: &MyWebContentsObserverHolder,
     render_frame_host: *mut ffi::RenderFrameHost,
 ) {
-    if let Some(r) = me.get() {
+    if let Some(r) = me.0.get() {
         r.as_ref()
             .borrow_mut()
             .RenderFrameDeleted(render_frame_host);
@@ -104,7 +104,7 @@ pub fn MyWebContentsObserver_RenderFrameDeleted(
 
 #[allow(non_snake_case)]
 pub fn MyWebContentsObserver_RelinquishOwnership(me: &mut MyWebContentsObserverHolder) {
-    me.relinquish_ownership();
+    me.0.relinquish_ownership();
 }
 
 // Generated only where non-pure virtuals exist
