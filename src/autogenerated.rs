@@ -1,6 +1,8 @@
 use crate::autocxxsubclass::{AutocxxSubclass, AutocxxSubclassHolder, AutocxxSubclassPeer};
 use crate::MyWebContentsObserver;
 
+
+
 #[cxx::bridge]
 pub(crate) mod ffi {
     unsafe extern "C++" {
@@ -23,7 +25,7 @@ pub(crate) mod ffi {
             self: Pin<&mut MyWebContentsObserverCpp>,
             render_frame_host: *mut RenderFrameHost,
         );
-        fn MyWebContentsObserverCpp_web_contents(
+        fn MyWebContentsObserverCpp_web_contents( // 2a
             self: Pin<&mut MyWebContentsObserverCpp>,
         ) -> *mut WebContents;
 
@@ -109,21 +111,16 @@ pub fn MyWebContentsObserver_RelinquishOwnership(me: &mut MyWebContentsObserverH
 
 // Generated only where non-pure virtuals exist
 #[allow(non_snake_case)]
-pub(crate) trait MyWebContentsObserverDefaults {
-    fn get(&mut self) -> std::pin::Pin<&mut ffi::MyWebContentsObserverCpp>;
+pub(crate) trait MyWebContentsObserverDefaults: AutocxxSubclass<ffi::MyWebContentsObserverCpp> {  // 2a
     fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
-        unsafe { self.get().RenderFrameCreated_default(render_frame_host) }
+        unsafe { self.pin_peer().RenderFrameCreated_default(render_frame_host) }
     }
     fn RenderFrameDeleted(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
-        unsafe { self.get().RenderFrameDeleted_default(render_frame_host) }
+        unsafe { self.pin_peer().RenderFrameDeleted_default(render_frame_host) }
     }
-    fn web_contents(&mut self) -> *mut ffi::WebContents {
-        self.get().MyWebContentsObserverCpp_web_contents()
+    fn web_contents(&mut self) -> *mut ffi::WebContents {  // 2a
+        self.pin_peer().MyWebContentsObserverCpp_web_contents()
     }
 }
 
-impl MyWebContentsObserverDefaults for MyWebContentsObserver {
-    fn get(&mut self) -> std::pin::Pin<&mut ffi::MyWebContentsObserverCpp> {
-        self.pin_peer()
-    }
-}
+impl MyWebContentsObserverDefaults for MyWebContentsObserver {}
