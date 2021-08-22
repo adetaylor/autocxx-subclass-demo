@@ -71,7 +71,7 @@ public:
   void RenderFrameDeleted_default(RenderFrameHost* rfh) {
     WebContentsObserver::RenderFrameDeleted(rfh);
   }
-  WebContents* MyWebContentsObserverCpp_web_contents() {
+  WebContents* MyWebContentsObserverCpp_web_contents() { // 2a
     return web_contents();
   }
   virtual void RenderFrameCreated(RenderFrameHost* rfh); // 1a
@@ -115,3 +115,23 @@ std::unique_ptr<MyTestObserverCpp> MyTestObserverCpp_make_unique(rust::Box<MyTes
 inline void TriggerTestObserverA(MyTestObserverCpp& obs) {
   obs.a();
 }
+
+
+// Trial
+
+class A {
+public:
+  virtual void foo() {}
+};
+
+class B : public A {
+public:
+  void bar() {}
+};
+
+class C : public B {
+public:
+  virtual void foo() {
+    B::foo();
+  }
+};
