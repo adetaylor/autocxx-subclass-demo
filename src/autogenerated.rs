@@ -109,6 +109,12 @@ pub fn MyWebContentsObserver_RelinquishOwnership(me: &mut MyWebContentsObserverH
     me.0.relinquish_ownership();
 }
 
+// pub(crate) trait WebContentsObserver { // final step, to enable Rust-side 'impl Trait' and similiar
+//     fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+//     fn RenderFrameDeleted(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+//     fn web_contents(&mut self) -> *mut ffi::WebContents;
+// }
+
 // Generated only where non-pure virtuals exist
 #[allow(non_snake_case)]
 pub(crate) trait MyWebContentsObserverDefaults: AutocxxSubclass<ffi::MyWebContentsObserverCpp> {  // 2a
@@ -123,4 +129,4 @@ pub(crate) trait MyWebContentsObserverDefaults: AutocxxSubclass<ffi::MyWebConten
     }
 }
 
-impl MyWebContentsObserverDefaults for MyWebContentsObserver {}
+impl MyWebContentsObserverDefaults for MyWebContentsObserver {} // 2a
