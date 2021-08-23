@@ -109,24 +109,32 @@ pub fn MyWebContentsObserver_RelinquishOwnership(me: &mut MyWebContentsObserverH
     me.0.relinquish_ownership();
 }
 
-// pub(crate) trait WebContentsObserver { // final step, to enable Rust-side 'impl Trait' and similiar
-//     fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
-//     fn RenderFrameDeleted(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
-//     fn web_contents(&mut self) -> *mut ffi::WebContents;
-// }
+pub(crate) trait WebContentsObserver { // final step, to enable Rust-side 'impl Trait' and similiar
+    fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
+        self.RenderFrameCreated_super(render_frame_host)
+    }
+    fn RenderFrameDeleted(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
+        self.RenderFrameDeleted_super(render_frame_host)
+    }
+    fn web_contents(&mut self) -> *mut ffi::WebContents {
+        self.web_contents_super()
+    }
+
+    fn RenderFrameCreated_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+    fn RenderFrameDeleted_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+    fn web_contents_super(&mut self) -> *mut ffi::WebContents;
+}
 
 // Generated only where non-pure virtuals exist
 #[allow(non_snake_case)]
-pub(crate) trait MyWebContentsObserverDefaults: AutocxxSubclass<ffi::MyWebContentsObserverCpp> {  // 2a
-    fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
+impl WebContentsObserver for MyWebContentsObserver  {  // 2a
+    fn RenderFrameCreated_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
         unsafe { self.pin_peer().RenderFrameCreated_default(render_frame_host) }
     }
-    fn RenderFrameDeleted(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
+    fn RenderFrameDeleted_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
         unsafe { self.pin_peer().RenderFrameDeleted_default(render_frame_host) }
     }
-    fn web_contents(&mut self) -> *mut ffi::WebContents {  // 2a
+    fn web_contents_super(&mut self) -> *mut ffi::WebContents {  // 2a
         self.pin_peer().MyWebContentsObserverCpp_web_contents()
     }
 }
-
-impl MyWebContentsObserverDefaults for MyWebContentsObserver {} // 2a
