@@ -78,9 +78,12 @@ fn main() {
 }
 
 
-trait A {
+trait A_supers {
     fn a_super(&self);
     fn b_super(&self);
+}
+
+trait A : A_supers {
     fn a(&self) {
         self.a_super()
     }
@@ -91,7 +94,7 @@ trait A {
 
 struct C;
 
-impl A for C {
+impl A_supers for C {
     fn a_super(&self) {
         println!("Calling super a");
     }
@@ -100,14 +103,21 @@ impl A for C {
     }
 }
 
-impl C {
+impl A for C {
     fn b(&self) {
         println!("Calling sub b")
     }
+}
+
+fn get_an_a() -> Box<dyn A> {
+    Box::new(C)
 }
 
 fn test_trait_arrangement() {
     let c = C;
     c.a();
     c.b();
+    let c2 = get_an_a();
+    c2.a();
+    c2.b();
 }
