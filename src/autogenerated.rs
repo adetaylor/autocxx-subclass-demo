@@ -109,7 +109,14 @@ pub fn MyWebContentsObserver_RelinquishOwnership(me: &mut MyWebContentsObserverH
     me.0.relinquish_ownership();
 }
 
-pub(crate) trait WebContentsObserver { // final step, to enable Rust-side 'impl Trait' and similiar
+#[allow(non_snake_case)]
+pub(crate) trait WebContentsObserver_supers {
+    fn RenderFrameCreated_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+    fn RenderFrameDeleted_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
+    fn web_contents_super(&mut self) -> *mut ffi::WebContents;
+}
+
+pub(crate) trait WebContentsObserver: WebContentsObserver_supers {
     fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
         self.RenderFrameCreated_super(render_frame_host)
     }
@@ -119,15 +126,11 @@ pub(crate) trait WebContentsObserver { // final step, to enable Rust-side 'impl 
     fn web_contents(&mut self) -> *mut ffi::WebContents {
         self.web_contents_super()
     }
-
-    fn RenderFrameCreated_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
-    fn RenderFrameDeleted_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost);
-    fn web_contents_super(&mut self) -> *mut ffi::WebContents;
 }
 
 // Generated only where non-pure virtuals exist
 #[allow(non_snake_case)]
-impl WebContentsObserver for MyWebContentsObserver  {  // 2a
+impl WebContentsObserver_supers for MyWebContentsObserver  {  // 2a
     fn RenderFrameCreated_super(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
         unsafe { self.pin_peer().RenderFrameCreated_default(render_frame_host) }
     }

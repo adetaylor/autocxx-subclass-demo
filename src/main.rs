@@ -29,8 +29,8 @@ impl AutocxxSubclass<ffi::MyWebContentsObserverCpp> for MyWebContentsObserver {
 impl AutocxxSubclassSelfOwned<ffi::MyWebContentsObserverCpp> for MyWebContentsObserver {}
 
 #[allow(non_snake_case)]
-impl MyWebContentsObserver {
-    pub(crate) fn RenderFrameCreated(&mut self, _render_frame_host: *mut ffi::RenderFrameHost) {
+impl WebContentsObserver for MyWebContentsObserver {
+    fn RenderFrameCreated(&mut self, _render_frame_host: *mut ffi::RenderFrameHost) {
         self.data.do_something();
         let _foo = self.web_contents(); // can also call methods on yourself
                                         // To release ownership from C++ side
