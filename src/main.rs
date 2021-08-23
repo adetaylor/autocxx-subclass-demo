@@ -79,16 +79,8 @@ fn main() {
 
 
 trait A {
-    fn a(&self);
-    fn b(&self);
-}
-
-trait B {
     fn a_super(&self);
     fn b_super(&self);
-}
-
-impl<T: B> A for T {
     fn a(&self) {
         self.a_super()
     }
@@ -99,7 +91,7 @@ impl<T: B> A for T {
 
 struct C;
 
-impl B for C {
+impl A for C {
     fn a_super(&self) {
         println!("Calling super a");
     }
