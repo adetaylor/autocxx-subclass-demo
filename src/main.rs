@@ -74,4 +74,48 @@ fn main() {
             .borrow_mut()
             .web_contents()
     );
+    test_trait_arrangement();
+}
+
+
+trait A {
+    fn a(&self);
+    fn b(&self);
+}
+
+trait B {
+    fn a_super(&self);
+    fn b_super(&self);
+}
+
+impl<T: B> A for T {
+    fn a(&self) {
+        self.a_super()
+    }
+    fn b(&self) {
+        self.b_super()
+    }
+}
+
+struct C;
+
+impl B for C {
+    fn a_super(&self) {
+        println!("Calling super a");
+    }
+    fn b_super(&self) {
+        println!("Calling super b");
+    }
+}
+
+impl C {
+    fn b(&self) {
+        println!("Calling sub b")
+    }
+}
+
+fn test_trait_arrangement() {
+    let c = C;
+    c.a();
+    c.b();
 }
