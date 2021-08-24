@@ -116,6 +116,7 @@ pub(crate) trait WebContentsObserver_supers {
     fn web_contents_super(&mut self) -> *mut ffi::WebContents;
 }
 
+#[allow(non_snake_case)]
 pub(crate) trait WebContentsObserver: WebContentsObserver_supers {
     fn RenderFrameCreated(&mut self, render_frame_host: *mut ffi::RenderFrameHost) {
         self.RenderFrameCreated_super(render_frame_host)
